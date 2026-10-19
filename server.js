@@ -3,9 +3,13 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { readCache, writeCache, normalizeUrl } = require('./lib/util');
+const { readCache, writeCache, normalizeUrl, httpError } = require('./lib/util');
 const { discoverSpeakers } = require('./lib/discover');
 const { enrich } = require('./lib/enrich');
+const { emailFor } = require('./lib/email');
+const { buildDraft } = require('./lib/draft');
+const composio = require('./lib/composio');
+const links = require('./lib/links');
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const PORT = Number(process.env.PORT) || 3210;
@@ -40,6 +44,42 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/enrich' && req.method === 'POST') {
       const body = await readBody(req);
       return sendJson(res, 200, await enrich(body.ids));
+    }
+    if (url.pathname === '/api/status' && req.method === 'GET') {
+      return sendJson(res, 200, { parallel: !!process.env.PARALLEL_API_KEY, ...(await composio.status()) });
+    }
+    if (url.pathname === '/api/email' && req.method === 'POST') {
+      const body = await readBody(req);
+      return sendJson(res, 200, await emailFor(String(body.id || '')));
+    }
+    if (url.pathname === '/api/draft/text' && req.method === 'POST') {
+      const body = await readBody(req);
+      const cache = readCache();
+      const speaker = cache && cache.speakers.find((s) => s.id === body.id);
+      if (!speaker) throw httpError(404, 'Speaker not found.');
+      return sendJson(res, 200, buildDraft({
+        speaker, interests: body.interests, conferenceName: cache.conferenceName,
+        senderName: String(body.senderName || '').slice(0, 80), matchReason: body.matchReason || null, happened: body.happened !== false,
+      }));
+    }
+    if (url.pathname === '/api/draft' && req.method === 'POST') {
+      // Creates a Gmail draft only. The user must click "Create Gmail draft"; nothing is ever sent.
+      const body = await readBody(req);
+      const to = String(body.to || '').trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(to)) throw httpError(400, 'Enter a valid recipient email address.');
+      if (!String(body.subject || '').trim() || !String(body.body || '').trim()) throw httpError(400, 'Subject and message cannot be empty.');
+      const draft = await composio.createGmailDraft({ to, subject: String(body.subject), body: String(body.body) });
+      return sendJson(res, 200, { created: true, ...draft, to });
+    }
+    if (url.pathname === '/api/links/check' && req.method === 'POST') {
+      const cache = readCache();
+      if (!cache) throw httpError(400, 'Load a conference first.');
+      const results = await links.checkMany(cache.speakers.flatMap(links.urlsOf));
+      let removed = 0;
+      for (const sp of cache.speakers) removed += await links.cleanSpeaker(sp, results);
+      writeCache(cache);
+      const states = [...results.values()].reduce((a, r) => { a[r.state] = (a[r.state] || 0) + 1; return a; }, {});
+      return sendJson(res, 200, { checked: results.size, ...states, removed });
     }
     const rel = url.pathname === '/' ? 'index.html' : decodeURIComponent(url.pathname.slice(1));
     const file = path.join(PUBLIC_DIR, rel);

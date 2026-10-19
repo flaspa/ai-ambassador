@@ -1,0 +1,11 @@
+/* Outreach panel */
+.o-form { display: grid; gap: 0.5rem; margin-top: 1rem; }
+.o-form label:not(.toggle) { font-weight: 600; font-size: 0.9rem; margin-top: 0.35rem; }
+.o-form textarea { min-height: 11rem; line-height: 1.5; }
+.o-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.5rem; }
+.o-actions .btn { padding: 0.6rem 1rem; }
+#o-msg.ok { color: var(--ok); }
+#o-msg a { color: var(--accent-ink); font-weight: 600; }
+.email-found { padding: 0.75rem 0.9rem; border: 1px solid var(--rule); border-left: 3px solid var(--lvl, var(--muted)); border-radius: 8px; background: var(--card); margin-bottom: 0.75rem; overflow-wrap: anywhere; }
+.email-found p { margin: 0.25rem 0 0; }
+#o-find { margin-top: 0.25rem; justify-self: start; }

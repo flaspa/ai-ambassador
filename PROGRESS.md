@@ -33,3 +33,10 @@
 - Re-ran Parallel research for all 73 speakers (0 failures): 60 have a bio, 38 have topic tags. Top matches with the default interests: Brad Porter, Felipe Chavez, Kevin Peterson (75), Aparna Chennapragada (66), Manal Habib (50).
 - Known gap: Hugo Barra (Meta, VR and wearables background) now scores low because his role and bio do not mention wearables. Search excerpts could restore him, at the cost of false matches.
 - Blocker: `COMPOSIO_API_KEY` in `.env` returns HTTP 401 from Composio's API. Milestone 3 (Sheets CRM write and Gmail drafts) needs a valid key before it can start.
+
+### 2026-10-19: Gmail drafts, email finder and link checks
+
+- **Live (Composio):** Gmail and Google Sheets are connected in the project that owns the `.env` key (account flavia@sensingplaces.com). `GMAIL_GET_PROFILE` and a Sheets search both succeeded. The app creates Gmail drafts with `GMAIL_CREATE_EMAIL_DRAFT`. There is no send route in the code. One test draft was created in Gmail to verify this and can be deleted.
+- **Live (Parallel):** 'Find email with Parallel' searches the web for a published work email. An address is accepted only if its domain matches the speaker's company or the page names both the speaker and the company, and it is shown with its source link and evidence. People-lookup sites (ContactOut, RocketReach and similar) are rejected, and addresses are never guessed. Many speakers will correctly return 'not found'; the user can type an address by hand.
+- **Template text:** the draft message is a template using the user's interests, the speaker's role and a matched reason. It is not written by an LLM. It is editable before the draft is created.
+- **Links:** profile, LinkedIn and source links are checked for 404, 410 and unknown hosts, and broken ones are removed (2 removed in the first pass; 0 on re-check). LinkedIn cannot be checked automatically (it rate-limits and blocks bots), so those links are marked unverified and kept. Sites that block bots with 403 are also kept. Link checks run automatically after each Parallel research run.

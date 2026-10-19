@@ -11,11 +11,14 @@ AI Ambassador is a personal AI agent for conference networking. Paste a conferen
 - **Match ranking.** Synonym-aware keyword scoring runs in the browser and re-ranks instantly when you change your interests. Every score shows quoted reasons from the speaker's own data. This is a heuristic, not an LLM.
 - **Speaker gallery and profiles.** Sort, filter, a "strong and good matches only" toggle, and a profile drawer with sources and a "Research again with Parallel" button.
 
+- **Email finder.** "Find email with Parallel" searches the web for a published work email and shows the source link and evidence. An address is accepted only when it matches the speaker's company. Addresses are never guessed, and many speakers will return "not found".
+- **Gmail drafts through Composio.** An editable message template (your interests, the speaker's role, a matched reason) becomes a draft in your Gmail. The app has no send function; nothing is ever sent automatically.
+- **Link checks.** Profile and source links that return 404 or 410, or point to a host that does not exist, are removed after each research run. LinkedIn and sites that block bots cannot be verified automatically and are kept.
+
 **In progress (not built yet)**
 
-- Selecting speakers and saving them to a CRM in Google Sheets (Composio).
-- Personalized Gmail drafts (Composio). Drafts only; nothing is ever sent automatically.
-- LinkedIn outreach: profile links and copy-ready messages. Invitations are never sent automatically.
+- Selecting speakers and saving them to a CRM in Google Sheets (Composio). The Sheets connection works; the write is not built.
+- LinkedIn outreach: copy-ready messages. Invitations are never sent automatically.
 
 ## Architecture
 
@@ -28,7 +31,9 @@ AI Ambassador is a personal AI agent for conference networking. Paste a conferen
 | `public/` | Plain HTML, CSS and JavaScript. `match.js` scores, `gallery.js` renders the grid, `profile.js` renders the drawer. |
 | `data/speakers.json` | Local cache created on first run. It is git-ignored because it can contain personal details found on the web. |
 
-Live integrations: Parallel Search. Composio (Google Sheets and Gmail) is planned and not yet used by the app.
+Live integrations: Parallel Search (research and email finding) and Composio (Gmail drafts). Google Sheets is connected but not yet used by the app.
+
+Other modules: `lib/email.js` (email finder), `lib/draft.js` (message template), `lib/composio.js` (Gmail draft client), `lib/links.js` (link checks), and `public/outreach.js` (the "Reach out" panel in the profile drawer).
 
 ## Install
 
@@ -43,7 +48,7 @@ cp .env.example .env      # on Windows PowerShell: Copy-Item .env.example .env
 Edit `.env` and fill in your keys:
 
 - `PARALLEL_API_KEY`: from the [Parallel platform](https://platform.parallel.ai). Required for research.
-- `COMPOSIO_API_KEY`: from [Composio](https://composio.dev). Not used by the app yet.
+- `COMPOSIO_API_KEY`: from [Composio](https://composio.dev), with write access. Create a Gmail auth config (Composio-managed) in that project and connect your Google account to it. Required for Gmail drafts.
 
 ## Run locally
 
