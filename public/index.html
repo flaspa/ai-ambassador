@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Ambassador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="gallery.css">
+  <link rel="stylesheet" href="gallery-profile.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="wordmark" href="/">AI Ambassador</a>
+    <span class="tagline">Meet the right people at any conference.</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <h1>Find the people worth meeting.</h1>
+        <p class="lede">Paste a conference link and tell us what you care about. We read the speaker list, research each person, and help you reach out.</p>
+      </div>
+
+      <form id="finder" class="finder" novalidate>
+        <div class="field">
+          <label for="conf-url">Conference URL</label>
+          <input id="conf-url" name="url" type="url" inputmode="url" autocomplete="off"
+                 value="https://www.mitaiconference.org/speakers" placeholder="https://yourconference.com/speakers" required>
+        </div>
+        <div class="field">
+          <label for="interests">Your interests</label>
+          <textarea id="interests" name="interests" rows="3">Embodied AI, robotics, computer vision, wearables</textarea>
+          <div class="chips" role="group" aria-label="Suggested interests">
+            <button type="button" class="chip" data-add="Embodied AI">Embodied AI</button>
+            <button type="button" class="chip" data-add="Robotics">Robotics</button>
+            <button type="button" class="chip" data-add="Computer vision">Computer vision</button>
+            <button type="button" class="chip" data-add="Wearables">Wearables</button>
+            <button type="button" class="chip" data-add="AI agents">AI agents</button>
+            <button type="button" class="chip" data-add="Healthcare AI">Healthcare AI</button>
+            <button type="button" class="chip" data-add="Venture capital">Venture capital</button>
+            <button type="button" class="chip" data-add="Developer tools">Developer tools</button>
+          </div>
+        </div>
+        <button id="find-btn" class="btn btn-primary" type="submit">Find my people</button>
+      </form>
+    </section>
+
+    <section id="results" class="results" aria-live="polite" hidden></section>
+  </main>
+
+  <footer class="site-footer">
+    Speaker data is read from the conference page. Biographies and topics come from live Parallel web search.
+  </footer>
+
+  <dialog id="profile" aria-labelledby="p-title">
+    <div class="p-wrap">
+      <div class="p-bar"><button type="button" class="p-close">Close</button></div>
+      <div class="p-body"></div>
+    </div>
+  </dialog>
+
+  <script src="match.js"></script>
+  <script src="gallery.js"></script>
+  <script src="profile.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
