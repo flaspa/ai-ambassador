@@ -25,3 +25,11 @@
 - **Live:** Research again with Parallel in the profile drawer runs a real fast search for that speaker and refreshes sources in place. Gallery data is cached in `data/speakers.json`.
 - **Heuristic:** scores are keyword and synonym matching, not an LLM. With the default interests the top 4 are Brad Porter, Felipe Chavez, James Cham and Kevin Peterson (75 each).
 - Known gaps: topic tags come from a short keyword list, so some speakers have none; a few weak matches rank above better ones when their bios are thin.
+
+### 2026-10-19: Publish and accuracy fixes
+
+- Published to https://github.com/flaspa/ai-ambassador (public, branch `main`). `.env` and the research cache `data/speakers.json` are git-ignored; `.env.example` lists the two key names with blank values. A secret scan of the committed files found nothing.
+- Topic tags now come from the speaker's role, vetted bio and source titles, not raw search excerpts. This removed false matches: James Cham (a VC) no longer ranks 3rd for robotics, and Ivan Burazin no longer has a computer vision tag. Bios also skip LinkedIn button text (for example 'Get intro to James').
+- Re-ran Parallel research for all 73 speakers (0 failures): 60 have a bio, 38 have topic tags. Top matches with the default interests: Brad Porter, Felipe Chavez, Kevin Peterson (75), Aparna Chennapragada (66), Manal Habib (50).
+- Known gap: Hugo Barra (Meta, VR and wearables background) now scores low because his role and bio do not mention wearables. Search excerpts could restore him, at the cost of false matches.
+- Blocker: `COMPOSIO_API_KEY` in `.env` returns HTTP 401 from Composio's API. Milestone 3 (Sheets CRM write and Gmail drafts) needs a valid key before it can start.
