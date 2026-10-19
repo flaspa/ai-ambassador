@@ -30,6 +30,9 @@
         <div><h2 id="p-title">${esc(sp.name)}</h2><p class="role">${esc([sp.title, sp.org].filter(Boolean).join(' · '))}</p></div>
       </div>
       <div class="p-score lvl-${m.level}"><span class="num">${m.score}</span><div><strong>${esc(m.label)}</strong><div class="bar"><i style="width:${m.score}%"></i></div></div></div>
+      <div class="p-crm">${window.Crm && Crm.inCrm(sp.id)
+        ? '<span class="pick is-in">In your CRM</span>'
+        : '<button id="p-addcrm" class="btn btn-primary" type="button">Add to CRM</button>'}</div>
       <h3>Why you match</h3>${reasons}
       <h3>About</h3>${sp.bio ? `<p>${esc(sp.bio)}</p>` : '<p class="muted">No public biography found.</p>'}
       ${(sp.topics || []).length ? `<ul class="topics">${sp.topics.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
@@ -51,6 +54,8 @@
     if (!sp) return;
     dlg.querySelector('.p-body').innerHTML = body(sp, Gallery.matchOf(sp));
     dlg.querySelector('#p-research').addEventListener('click', research);
+    const addBtn = dlg.querySelector('#p-addcrm');
+    if (addBtn) addBtn.addEventListener('click', async () => { addBtn.disabled = true; await Crm.add([currentId]); render(); });
     if (window.Outreach) window.Outreach.mount(dlg.querySelector('#p-actions'), sp);
   }
 

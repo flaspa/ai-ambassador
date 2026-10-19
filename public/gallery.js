@@ -33,7 +33,11 @@
     const m = matchOf(s);
     const top = m.reasons[0];
     const topics = (s.topics || []).slice(0, 3).map((t) => `<li>${esc(t)}</li>`).join('');
-    return `<li><button type="button" class="card card-btn lvl-${m.level}" data-id="${esc(s.id)}">
+    const inCrm = window.Crm && Crm.inCrm(s.id);
+    const pick = inCrm
+      ? '<span class="pick is-in">In CRM</span>'
+      : `<label class="pick"><input type="checkbox" class="pick-box" data-id="${esc(s.id)}" ${window.Crm && Crm.isSelected(s.id) ? 'checked' : ''} aria-label="Select ${esc(s.name)}"> Select</label>`;
+    return `<li>${pick}<button type="button" class="card card-btn lvl-${m.level}" data-id="${esc(s.id)}">
       <span class="card-top">
         <span class="avatar">${esc(initials(s.name))}${s.image ? `<img src="${esc(s.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}</span>
         <span class="who"><span class="name">${esc(s.name)}</span><span class="role">${esc([s.title, s.org].filter(Boolean).join(' · '))}</span></span>
@@ -64,6 +68,7 @@
   function mount() {
     root().innerHTML = `
       <p class="summary"></p>
+      <div class="crm-bar" id="crm-bar"></div>
       <div class="toolbar">
         <label class="sr" for="g-filter">Filter speakers</label>
         <input id="g-filter" type="search" placeholder="Filter by name, company, role or topic" value="${esc(filter)}">
@@ -77,15 +82,20 @@
     r.querySelector('#g-filter').addEventListener('input', (e) => { filter = e.target.value; paintGrid(); });
     r.querySelector('#g-sort').addEventListener('change', (e) => { sort = e.target.value; paintGrid(); });
     r.querySelector('#g-good').addEventListener('change', (e) => { goodOnly = e.target.checked; paintGrid(); });
+    r.addEventListener('change', (e) => {
+      if (e.target.classList.contains('pick-box')) Crm.toggle(e.target.dataset.id, e.target.checked);
+    });
     r.addEventListener('click', (e) => {
       if (e.target.id === 'clear-filter') { filter = ''; goodOnly = false; mount(); return; }
       const b = e.target.closest('.card-btn');
       if (b) Profile.open(b.dataset.id, b);
     });
     paintGrid();
+    if (window.Crm) Crm.bar();
   }
 
   window.Gallery = {
+    refresh() { if (speakers.length) paintGrid(); },
     set(list, interests) { speakers = list; interestText = interests; rescore(); mount(); },
     setInterests(text) { interestText = text; rescore(); if (speakers.length) { paintGrid(); Profile.refresh(); } },
     update(updated) {

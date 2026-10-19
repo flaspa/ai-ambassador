@@ -36,7 +36,23 @@
 
 ### 2026-10-19: Gmail drafts, email finder and link checks
 
-- **Live (Composio):** Gmail and Google Sheets are connected in the project that owns the `.env` key (account flavia@sensingplaces.com). `GMAIL_GET_PROFILE` and a Sheets search both succeeded. The app creates Gmail drafts with `GMAIL_CREATE_EMAIL_DRAFT`. There is no send route in the code. One test draft was created in Gmail to verify this and can be deleted.
+- **Live (Composio):** Gmail and Google Sheets are connected in the project that owns the `.env` key (the signed-in Google account). `GMAIL_GET_PROFILE` and a Sheets search both succeeded. The app creates Gmail drafts with `GMAIL_CREATE_EMAIL_DRAFT`. There is no send route in the code. One test draft was created in Gmail to verify this and can be deleted.
 - **Live (Parallel):** 'Find email with Parallel' searches the web for a published work email. An address is accepted only if its domain matches the speaker's company or the page names both the speaker and the company, and it is shown with its source link and evidence. People-lookup sites (ContactOut, RocketReach and similar) are rejected, and addresses are never guessed. Many speakers will correctly return 'not found'; the user can type an address by hand.
 - **Template text:** the draft message is a template using the user's interests, the speaker's role and a matched reason. It is not written by an LLM. It is editable before the draft is created.
 - **Links:** profile, LinkedIn and source links are checked for 404, 410 and unknown hosts, and broken ones are removed (2 removed in the first pass; 0 on re-check). LinkedIn cannot be checked automatically (it rate-limits and blocks bots), so those links are marked unverified and kept. Sites that block bots with 403 are also kept. Link checks run automatically after each Parallel research run.
+
+### 2026-10-19: Personal CRM with Google Sheets sync
+
+- **Local CRM:** select speakers with the checkboxes (or Add to CRM in a profile) and they are saved to `data/crm.json` (git-ignored) with score, match reason, status, email and notes. Statuses: To contact, Draft ready, Contacted, Replied, Not a fit.
+- **Live (Composio):** 'Sync to Google Sheets' creates a sheet named 'AI Ambassador CRM' in the connected Google account on first use, then rewrites the same table on later syncs, so there are no duplicate rows. It runs only when the user clicks the button. Verified by reading the sheet back: the header and 3 rows matched, including the edited status and note.
+- **Test data:** 3 test contacts (Brad Porter, Kevin Peterson, Aparna Chennapragada) were added through the API during testing and are in the sheet. They can be removed in the CRM panel; the next sync clears their rows.
+- **Not browser-tested:** the checkbox and Add to CRM click path were checked by code and API calls plus screenshots, not by clicking in a browser.
+
+
+### 2026-10-19: Hunter email finder through Composio Instant
+
+- Instant was turned on in Composio Platform, project Settings. Before that, the same call returned HTTP 403 ManagedCredential_NotEnabled (code 6605).
+- **Live test (one lookup, about 0.024 USD):** HUNTER_EMAIL_FINDER with connected_account_id 'instant_account', domain squirepb.com, name Sarah Mirza returned a first.last@company work email, score 97, verification status valid, accept_all false, source type generated, position Partner. Composio did not return a charge amount; the cost shown in the app is the catalog price.
+- **App:** 'Find email' in the profile drawer and on CRM contacts (under 'Find or verify email'), plus 'Verify email'. Every paid call needs a confirmation that shows the cost; the server rejects paid calls without confirmed=true. There is no bulk route. The company domain is only a suggestion taken from source links and can be edited before confirming. Results are saved on the speaker and the CRM contact, so repeat lookups are free (checked: repeat find returned the saved result with no Composio call). Only status valid counts as verified; accept_all, risky and unknown show as unverified. The CRM sheet has a new 'Email check' column. A found address fills the Gmail draft 'To' field; the draft is still created only on click and never sent.
+- **Not tested live:** HUNTER_EMAIL_VERIFIER (not run, to avoid a charge) and the confirm-and-search click path in a browser. The Verify button shows the saved Finder result's status.
+- Also in this commit: the CRM feature, and a fix for garbled ellipsis characters in app.js.

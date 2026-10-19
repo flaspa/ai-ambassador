@@ -15,9 +15,15 @@ AI Ambassador is a personal AI agent for conference networking. Paste a conferen
 - **Gmail drafts through Composio.** An editable message template (your interests, the speaker's role, a matched reason) becomes a draft in your Gmail. The app has no send function; nothing is ever sent automatically.
 - **Link checks.** Profile and source links that return 404 or 410, or point to a host that does not exist, are removed after each research run. LinkedIn and sites that block bots cannot be verified automatically and are kept.
 
+- **Personal CRM with Google Sheets sync.** Select speakers, add them to a local CRM (status, email, notes), and sync to a Google Sheet through Composio when you click the button. Re-syncing updates the same sheet without duplicate rows.
+- **Find email with Hunter (Composio Instant).** A Find email button on speaker profiles and CRM contacts looks up a professional email from the name and company domain, and a Verify email button checks it. Each lookup is paid (about 
+
+**In progress (not built yet)**.024 to find, 
+
+**In progress (not built yet)**.012 to verify, billed by Composio), shows the cost, and runs only after you confirm. Results are saved with the contact so nobody is paid for twice, and only a status of valid counts as verified (accept_all, risky and unknown are unverified). No Hunter account or key is needed.
+
 **In progress (not built yet)**
 
-- Selecting speakers and saving them to a CRM in Google Sheets (Composio). The Sheets connection works; the write is not built.
 - LinkedIn outreach: copy-ready messages. Invitations are never sent automatically.
 
 ## Architecture
@@ -31,9 +37,9 @@ AI Ambassador is a personal AI agent for conference networking. Paste a conferen
 | `public/` | Plain HTML, CSS and JavaScript. `match.js` scores, `gallery.js` renders the grid, `profile.js` renders the drawer. |
 | `data/speakers.json` | Local cache created on first run. It is git-ignored because it can contain personal details found on the web. |
 
-Live integrations: Parallel Search (research and email finding) and Composio (Gmail drafts). Google Sheets is connected but not yet used by the app.
+Live integrations: Parallel Search (research and email finding) and Composio (Gmail drafts the Google Sheets CRM and Hunter email lookups through Composio Instant).
 
-Other modules: `lib/email.js` (email finder), `lib/draft.js` (message template), `lib/composio.js` (Gmail draft client), `lib/links.js` (link checks), and `public/outreach.js` (the "Reach out" panel in the profile drawer).
+Other modules: `lib/email.js` (email finder), `lib/draft.js` (message template), `lib/composio.js` (Gmail draft client), `lib/links.js` (link checks), `lib/crm.js` (local CRM and Sheets sync), `lib/hunter.js` (Hunter lookups through Composio Instant), `public/hunter-ui.js` (cost confirmation), `public/crm.js` and `public/crm-panel.js` (selection bar and CRM panel), and `public/outreach.js` (the "Reach out" panel in the profile drawer).
 
 ## Install
 
@@ -48,7 +54,7 @@ cp .env.example .env      # on Windows PowerShell: Copy-Item .env.example .env
 Edit `.env` and fill in your keys:
 
 - `PARALLEL_API_KEY`: from the [Parallel platform](https://platform.parallel.ai). Required for research.
-- `COMPOSIO_API_KEY`: from [Composio](https://composio.dev), with write access. Create a Gmail auth config (Composio-managed) in that project and connect your Google account to it. Required for Gmail drafts.
+- `COMPOSIO_API_KEY`: from [Composio](https://composio.dev), with write access. Create a Gmail auth config (Composio-managed) in that project and connect your Google account to it. Required for Gmail drafts and the Sheets CRM. For Hunter email lookups, turn on Instant in Composio Platform, project Settings; Instant lookups are billed by Composio.
 
 ## Run locally
 

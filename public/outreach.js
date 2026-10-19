@@ -25,8 +25,11 @@
     const known = sp.emailLookup && sp.emailLookup.email ? sp.emailLookup.email : '';
     el.innerHTML = `
       <h3>Reach out</h3>
-      <div id="o-email">${emailBlock(sp)}</div>
-      <button id="o-find" class="btn btn-secondary" type="button">${sp.emailLookup ? 'Search for email again' : 'Find email with Parallel'}</button>
+      <div id="o-hunter"></div>
+      <details class="o-free"><summary>Free web search for a published email (Parallel)</summary>
+        <div id="o-email">${emailBlock(sp)}</div>
+        <button id="o-find" class="btn btn-secondary" type="button">${sp.emailLookup && sp.emailLookup.sourceUrl ? 'Search for email again' : 'Find email with Parallel'}</button>
+      </details>
       <div class="o-form">
         <label for="o-to">To</label><input id="o-to" type="email" placeholder="name@company.com" value="${esc(known)}" autocomplete="off">
         <label for="o-name">Your name (signature)</label><input id="o-name" type="text" value="${esc(name)}" autocomplete="name">
@@ -42,6 +45,8 @@
       </div>`;
     const $ = (id) => el.querySelector(id);
     const say = (t, ok) => { const m = $('#o-msg'); m.innerHTML = t; m.className = ok ? 'muted ok' : 'muted'; };
+    // A discovered address fills the "To" field; the user still decides whether to create the draft.
+    HunterUI.mount($('#o-hunter'), sp.id, { onChange: (r) => { if (r.email) $('#o-to').value = r.email; if (window.Crm) Crm.load(); } });
 
     async function write() {
       localStorage.setItem('ambassador.name', $('#o-name').value);

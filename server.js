@@ -10,6 +10,8 @@ const { emailFor } = require('./lib/email');
 const { buildDraft } = require('./lib/draft');
 const composio = require('./lib/composio');
 const links = require('./lib/links');
+const crm = require('./lib/crm');
+const hunter = require('./lib/hunter');
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const PORT = Number(process.env.PORT) || 3210;
@@ -45,8 +47,28 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req);
       return sendJson(res, 200, await enrich(body.ids));
     }
+    if (url.pathname === '/api/crm' && req.method === 'GET') return sendJson(res, 200, crm.list());
+    if (url.pathname.startsWith('/api/crm/') && req.method === 'POST') {
+      const body = await readBody(req);
+      const op = url.pathname.slice('/api/crm/'.length);
+      if (op === 'add') return sendJson(res, 200, crm.add(body.contacts));
+      if (op === 'update') return sendJson(res, 200, crm.update(String(body.id || ''), body.patch || {}));
+      if (op === 'remove') return sendJson(res, 200, crm.remove(String(body.id || '')));
+      if (op === 'sync') return sendJson(res, 200, await crm.sync()); // writes to Google Sheets; only runs on a user click
+    }
     if (url.pathname === '/api/status' && req.method === 'GET') {
       return sendJson(res, 200, { parallel: !!process.env.PARALLEL_API_KEY, ...(await composio.status()) });
+    }
+    if (url.pathname.startsWith('/api/hunter/')) {
+      // Paid lookups (billed by Composio Instant). Each one runs only from a confirmed click; there is no bulk route.
+      const op = url.pathname.slice('/api/hunter/'.length);
+      if (op === 'quote' && req.method === 'GET') return sendJson(res, 200, hunter.quote(String(url.searchParams.get('id') || '')));
+      if (req.method === 'POST' && (op === 'find' || op === 'verify')) {
+        const body = await readBody(req);
+        if (body.confirmed !== true) throw httpError(400, 'Confirm the cost before running a paid lookup.');
+        const id = String(body.id || '');
+        return sendJson(res, 200, op === 'find' ? await hunter.find(id, body.domain) : await hunter.verify(id));
+      }
     }
     if (url.pathname === '/api/email' && req.method === 'POST') {
       const body = await readBody(req);

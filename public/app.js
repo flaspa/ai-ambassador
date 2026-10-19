@@ -69,7 +69,7 @@ async function loadSpeakers() {
   localStorage.setItem('ambassador.url', url);
   localStorage.setItem('ambassador.interests', interests.value);
   findBtn.disabled = true;
-  showStatus('Reading the speaker listÃ¢â‚¬Â¦');
+  showStatus('Reading the speaker list…');
   try {
     const res = await fetch(`/api/speakers?url=${encodeURIComponent(url)}`);
     const data = await res.json();
@@ -88,7 +88,7 @@ async function runEnrich() {
   const count = pending || current.speakers.length;
   btn.disabled = true;
   btn.classList.add('is-busy');
-  btn.textContent = 'ResearchingÃ¢â‚¬Â¦';
+  btn.textContent = 'Researching…';
   const note = results.querySelector('.enrich-note');
   note.className = 'enrich-note';
   note.textContent = `Searching the web for ${count} speakers. This can take up to a minute.`;
@@ -118,6 +118,8 @@ form.addEventListener('submit', (e) => {
   loadSpeakers();
 });
 
+Crm.load();
+
 // Re-rank instantly when the interests change (no server call).
 let rankTimer;
 interests.addEventListener('input', () => {
@@ -129,5 +131,5 @@ document.querySelectorAll('.chip').forEach((chip) => chip.addEventListener('clic
 // Demo shortcuts: /?auto=1 loads speakers immediately; &open=<id> opens a profile.
 const params = new URLSearchParams(location.search);
 if (params.has('auto')) {
-  loadSpeakers().then(() => { const id = params.get('open'); if (id && Gallery.byId(id)) Profile.open(id); });
+  loadSpeakers().then(() => { const id = params.get('open'); if (id && Gallery.byId(id)) Profile.open(id); if (params.has('crm')) Crm.load().then(() => Crm.open()); });
 }

@@ -35,3 +35,4 @@ coverage/
 # The app rebuilds it on first use.
 data/speakers.json
 data/*.png
+data/crm.json
